@@ -96,7 +96,6 @@ export default {
     filterItemsByCountry(value) {
       if (!value) return;
       const result = sales.results.filter((res) => res.country === value);
-      console.log(result, 'result');
       if (result.length > 0) {
         this.items = result;
       } else {
