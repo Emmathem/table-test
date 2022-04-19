@@ -50,7 +50,7 @@
       :footer-props="{
         itemsPerPageOptions: [10, 20, 30, 40, 50]
       }"
-      @pagination="showNext"
+      @pagination="paginatePage"
       loading-text="Fetching, please wait..."
       :loading="loading"
     >
@@ -74,7 +74,6 @@ export default {
     return {
       searchTerm: '',
       form: {},
-      formattedData: [],
       pageCount: 0,
       pageObj: {
         page: 1,
@@ -97,7 +96,7 @@ export default {
     },
     getFilteredList() {
       let searchResults = [];
-      const data = this.formattedData;
+      const data = this.items;
       searchResults = data.filter((item) => {
         const user = item.user || {};
         return (
@@ -112,22 +111,12 @@ export default {
       return Object.keys(this.form).length > 0;
     },
   },
-  watch: {
-    items: {
-      handler(newList) {
-        if (newList) {
-          this.formattedData = newList;
-        }
-      },
-      immediate: true,
-    },
-  },
   methods: {
     resetField() {
       this.$emit('resetFields');
       this.form = {};
     },
-    showNext($event) {
+    paginatePage($event) {
       this.$emit('paginatePage', $event)
     },
     filterRecordByOption(value, type) {

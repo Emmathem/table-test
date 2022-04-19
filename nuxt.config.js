@@ -33,6 +33,7 @@ export default {
   plugins: [
     '~/plugins/methods/filters.js',
     '~/plugins/methods/helpers.js',
+    { src: '~/plugins/vue-toastification.js', ssr: false },
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
