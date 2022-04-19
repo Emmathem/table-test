@@ -29,6 +29,9 @@
           @change="filterRecordByOption($event, 'country')"
         />
       </v-col>
+      <v-col>
+        <v-btn v-show="showBtn" depressed color="primary" @click="resetField">Reset</v-btn>
+      </v-col>
     </v-row>
     <v-data-table :headers="headers" :items="getFilteredList" item-key="email" class="elevation-1 mt-4">
       <template v-slot:item.user="{ item }">
@@ -39,16 +42,28 @@
         <span>{{ item.sales | amountFormat }}</span>
       </template>
     </v-data-table>
+    <v-row align="end" justify="end" class="mt-3 mb-3" dense>
+      <v-col col>
+        <v-pagination v-model="pageObj.page" :length="items.length" :total-visible="7" />
+      </v-col>
+    </v-row>
   </div>
 </template>
 
 <script>
+import Country from '../static/countries.json';
+
 export default {
   props: ['headers', 'items'],
   data() {
     return {
       searchTerm: '',
       form: {},
+      formattedData: [],
+      pageObj: {
+        page: 1,
+        size: 10,
+      },
     }
   },
   computed:{
@@ -62,17 +77,18 @@ export default {
       return filterOut.map((res) => res.gender)
     },
     getCountry() {
-      const seen = new Set();
-      const filtered = this.items.filter(item => {
-        const getDuplicate = seen.has(item.country);
-        seen.add(item.country);
-        return !getDuplicate;
-      })
-      return filtered.map((res) => res.country).sort();
+      // const seen = new Set();
+      // const filtered = this.items.filter(item => {
+      //   const getDuplicate = seen.has(item.country);
+      //   seen.add(item.country);
+      //   return !getDuplicate;
+      // })
+      return Country.map((res) => res.name);
+      // return filtered.map((res) => res.country).sort();
     },
     getFilteredList() {
       let searchResults = [];
-      const data = this.items;
+      const data = this.formattedData;
       searchResults = data.filter((item) => {
         const user = item.user || {};
         return (
@@ -83,8 +99,25 @@ export default {
       });
       return searchResults;
     },
+    showBtn() {
+      return Object.keys(this.form).length > 0;
+    },
+  },
+  watch: {
+    items: {
+      handler(newList) {
+        if (newList) {
+          this.formattedData = newList;
+        }
+      },
+      immediate: true,
+    },
   },
   methods: {
+    resetField() {
+      this.$emit('resetFields');
+      this.form = {};
+    },
     filterRecordByOption(value, type) {
       if (type === 'gender') {
         this.$emit('filterItemsByGender', value);

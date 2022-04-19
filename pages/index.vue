@@ -17,13 +17,14 @@
       <v-row>
         <v-col cols>
           <DataTable
-            v-if="items.length"
+            v-if="!loading"
             :headers="headers"
             :items="items"
+            @resetFields="resetFields"
             @filterItemsByGender="filterItemsByGender"
             @filterItemsByCountry="filterItemsByCountry"
           />
-          <v-progress-circular v-else width="2" color="rs__primary" indeterminate class="mx-auto" />
+          <v-progress-circular v-if="loading" width="2" color="rs__primary" indeterminate class="mx-auto" />
         </v-col>
       </v-row>
     </v-container>
@@ -40,6 +41,7 @@ export default {
   data() {
     return {
       sales,
+      loading: false,
       items: [],
       headers: [
         { text: 'Name', value: 'user', align: 'start' },
@@ -57,25 +59,35 @@ export default {
   methods: {
     async fetchData(page, size) {
       const start = page * size
-      await this.delay(3000)
+      this.loading = true;
+      await this.delay(300)
+      this.loading = false;
       return await sales.results.slice(start, start + size)
     },
     delay(ms) {
       return new Promise(resolve => setTimeout(resolve, ms))
     },
+    async resetFields() {
+      this.form = {};
+      this.items = await this.fetchData(0, 50)
+    },
     filterItemsByGender(value) {
-      console.log(value,  'vvvv');
       if (!value) return []
-      const result = this.items.filter((res) => res.gender === value);
-      this.items = result;
-      console.log(result);
+      const result = sales.results.filter((res) => res.gender === value);
+      console.log(result, 'result');
+      if (result.length > 0) {
+        this.items = result;
+      } else
+        this.items = []
     },
     filterItemsByCountry(value) {
-      console.log(value,  'vvvv');
       if (!value) return []
-      const result = this.items.filter((res) => res.country === value);
-      this.items = result;
-      console.log(result);
+      const result = sales.results.filter((res) => res.country === value);
+      console.log(result, 'result');
+      if (result.length > 0) {
+        this.items = result;
+      } else
+      this.items = []
     },
   }
 }
