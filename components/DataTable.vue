@@ -11,8 +11,14 @@
 </template>-->
 <template>
   <div class="mt-10">
-    <v-row dense class="flex-row" align="center">
-      <v-col><v-text-field v-model="searchTerm" label="Search by First, Last Name or Email" /></v-col>
+    <v-row dense class="flex-row" align="center" justify="space-between">
+      <v-col>
+        <v-text-field
+        v-model="searchTerm"
+        append-icon="mdi-magnify"
+        label="Search by First, Last Name or Email"
+      />
+      </v-col>
       <v-col>
         <v-select
           v-model="form.gender"
@@ -33,7 +39,21 @@
         <v-btn v-show="showBtn" depressed color="primary" @click="resetField">Reset</v-btn>
       </v-col>
     </v-row>
-    <v-data-table :headers="headers" :items="getFilteredList" item-key="email" class="elevation-1 mt-4">
+    <v-data-table
+      :headers="headers"
+      :items="getFilteredList"
+      item-key="email"
+      class="elevation-1 mt-4"
+      :items-per-page="pageObj.size"
+      :show-current-page="true"
+      :server-items-length="getPaginationData.totalLength"
+      :footer-props="{
+        itemsPerPageOptions: [10, 20, 30, 40, 50]
+      }"
+      @pagination="showNext"
+      loading-text="Fetching, please wait..."
+      :loading="loading"
+    >
       <template v-slot:item.user="{ item }">
         <span>{{ item.user.title }} {{ item.user.first_name }} {{ item.user.last_name }}</span>
       </template>
@@ -42,11 +62,6 @@
         <span>{{ item.sales | amountFormat }}</span>
       </template>
     </v-data-table>
-    <v-row align="end" justify="end" class="mt-3 mb-3" dense>
-      <v-col col>
-        <v-pagination v-model="pageObj.page" :length="items.length" :total-visible="7" />
-      </v-col>
-    </v-row>
   </div>
 </template>
 
@@ -54,12 +69,13 @@
 import Country from '../static/countries.json';
 
 export default {
-  props: ['headers', 'items'],
+  props: ['headers', 'items', 'getPaginationData', 'loading', 'allRecords'],
   data() {
     return {
       searchTerm: '',
       form: {},
       formattedData: [],
+      pageCount: 0,
       pageObj: {
         page: 1,
         size: 10,
@@ -69,7 +85,7 @@ export default {
   computed:{
     getGenders() {
       const seen = new Set();
-      const filterOut =  this.items.filter(item => {
+      const filterOut =  this.allRecords.filter(item => {
         const duplicate = seen.has(item.gender);
         seen.add(item.gender);
         return !duplicate;
@@ -77,14 +93,7 @@ export default {
       return filterOut.map((res) => res.gender)
     },
     getCountry() {
-      // const seen = new Set();
-      // const filtered = this.items.filter(item => {
-      //   const getDuplicate = seen.has(item.country);
-      //   seen.add(item.country);
-      //   return !getDuplicate;
-      // })
       return Country.map((res) => res.name);
-      // return filtered.map((res) => res.country).sort();
     },
     getFilteredList() {
       let searchResults = [];
@@ -117,6 +126,9 @@ export default {
     resetField() {
       this.$emit('resetFields');
       this.form = {};
+    },
+    showNext($event) {
+      this.$emit('paginatePage', $event)
     },
     filterRecordByOption(value, type) {
       if (type === 'gender') {

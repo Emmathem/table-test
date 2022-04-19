@@ -17,14 +17,17 @@
       <v-row>
         <v-col cols>
           <DataTable
-            v-if="!loading"
             :headers="headers"
             :items="items"
+            :loading="loading"
+            :getPaginationData="getPaginationData"
             @resetFields="resetFields"
             @filterItemsByGender="filterItemsByGender"
             @filterItemsByCountry="filterItemsByCountry"
+            @paginatePage="paginatePage"
+            :all-records="sales.results"
           />
-          <v-progress-circular v-if="loading" width="2" color="rs__primary" indeterminate class="mx-auto" />
+<!--          <v-progress-circular v-if="loading" width="2" color="rs__primary" indeterminate class="mx-auto" />-->
         </v-col>
       </v-row>
     </v-container>
@@ -54,13 +57,20 @@ export default {
     }
   },
   async created() {
-    this.items = await this.fetchData(0, 50)
+    this.items = await this.fetchData(0, 10)
+  },
+  computed: {
+    getPaginationData() {
+      return {
+        totalLength: sales.results.length,
+      }
+    },
   },
   methods: {
     async fetchData(page, size) {
       const start = page * size
       this.loading = true;
-      await this.delay(300)
+      await this.delay(1000)
       this.loading = false;
       return await sales.results.slice(start, start + size)
     },
@@ -69,12 +79,15 @@ export default {
     },
     async resetFields() {
       this.form = {};
-      this.items = await this.fetchData(0, 50)
+      this.items = await this.fetchData(0, 10)
+    },
+    async paginatePage($event) {
+      const { page, itemsPerPage } = $event
+      this.items = await this.fetchData(page, itemsPerPage);
     },
     filterItemsByGender(value) {
       if (!value) return []
       const result = sales.results.filter((res) => res.gender === value);
-      console.log(result, 'result');
       if (result.length > 0) {
         this.items = result;
       } else
@@ -83,7 +96,6 @@ export default {
     filterItemsByCountry(value) {
       if (!value) return []
       const result = sales.results.filter((res) => res.country === value);
-      console.log(result, 'result');
       if (result.length > 0) {
         this.items = result;
       } else
