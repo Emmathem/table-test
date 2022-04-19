@@ -3,7 +3,10 @@ import colors from 'vuetify/es5/util/colors'
 export default {
   // Disable server-side rendering: https://go.nuxtjs.dev/ssr-mode
   ssr: false,
-
+  server: {
+    port: 4900,
+    host: '0.0.0.0',
+  },
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
     titleTemplate: '%s - resights-test',
@@ -28,6 +31,8 @@ export default {
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
+    '~/plugins/methods/filters.js',
+    '~/plugins/methods/helpers.js',
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -37,7 +42,7 @@ export default {
   buildModules: [
     // https://go.nuxtjs.dev/vuetify
     '@nuxtjs/vuetify',
-    
+
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules

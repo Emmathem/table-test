@@ -1,18 +1,32 @@
-<template lang="pug">
-  v-container
-    v-row
-      v-col(cols)
-        DataTable(
-          v-if="items.length"
-          :headers="headers"
-          :items="items"
-        )
-        v-progress-circular(
-          v-else
-          width="2"
-          color="rs__primary"
-          indeterminate
-        ).mx-auto
+<template>
+<!--  v-container-->
+<!--    v-row-->
+<!--      v-col(cols)-->
+<!--        DataTable(-->
+<!--          v-if="items.length"-->
+<!--          :headers="headers"-->
+<!--          :items="items"-->
+<!--        )-->
+<!--        v-progress-circular(-->
+<!--          v-else-->
+<!--          width="2"-->
+<!--          color="rs__primary"-->
+<!--          indeterminate-->
+<!--        ).mx-auto-->
+    <v-container>
+      <v-row>
+        <v-col cols>
+          <DataTable
+            v-if="items.length"
+            :headers="headers"
+            :items="items"
+            @filterItemsByGender="filterItemsByGender"
+            @filterItemsByCountry="filterItemsByCountry"
+          />
+          <v-progress-circular v-else width="2" color="rs__primary" indeterminate class="mx-auto" />
+        </v-col>
+      </v-row>
+    </v-container>
 </template>
 
 <script>
@@ -48,7 +62,21 @@ export default {
     },
     delay(ms) {
       return new Promise(resolve => setTimeout(resolve, ms))
-    }
+    },
+    filterItemsByGender(value) {
+      console.log(value,  'vvvv');
+      if (!value) return []
+      const result = this.items.filter((res) => res.gender === value);
+      this.items = result;
+      console.log(result);
+    },
+    filterItemsByCountry(value) {
+      console.log(value,  'vvvv');
+      if (!value) return []
+      const result = this.items.filter((res) => res.country === value);
+      this.items = result;
+      console.log(result);
+    },
   }
 }
 </script>
